@@ -13,6 +13,8 @@ import os
 
 from PIL import Image, ImageDraw, ImageFont
 
+from typeset import columns, double_rule, fit_size
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(ROOT, "assets")
 SIZE = 1024
@@ -74,6 +76,7 @@ def story(x, y, w, image, kicker, headline, sub, img_h, focus_y=0.5,
     ty = y + img_h + 8
     pen.text((x + 2, ty), kicker, font=F(SANS_BOLD, 19), fill=RED)
     ty += 26
+    head_size = fit_size(pen, headline, SANS_BOLD, w - 4, 2, head_size)
     for line in wrap(pen, headline, F(SANS_BOLD, head_size), w - 4):
         pen.text((x + 2, ty), line, font=F(SANS_BOLD, head_size), fill=INK)
         ty += head_size + 4
@@ -86,10 +89,10 @@ def story(x, y, w, image, kicker, headline, sub, img_h, focus_y=0.5,
 # ---------------- masthead ----------------
 pen.text((SIZE // 2, 16), "T H E   W O R L D   T O D A Y",
          font=F(SERIF_BOLD, 40), fill=NAVY, anchor="ma")
-pen.line([(MARGIN, 74), (SIZE - MARGIN, 74)], fill=NAVY, width=3)
+double_rule(pen, MARGIN, SIZE - MARGIN, 72, NAVY)
 pen.text((SIZE // 2, 84), "SATURDAY, 21 NOVEMBER 2026",
          font=F(SANS_BOLD, 55), fill=RED, anchor="ma")
-pen.line([(MARGIN, 152), (SIZE - MARGIN, 152)], fill=NAVY, width=3)
+double_rule(pen, MARGIN, SIZE - MARGIN, 150, NAVY)
 
 # ---------------- lead story ----------------
 story(MARGIN, 166, SIZE - 2 * MARGIN,
@@ -100,7 +103,9 @@ story(MARGIN, 166, SIZE - 2 * MARGIN,
       img_h=200, focus_y=0.45, head_size=36, sub_size=23)
 
 # ---------------- 2x2 grid ----------------
-COL = (SIZE - 2 * MARGIN - 18) // 2
+GRID = columns(SIZE, MARGIN, 18, 2)
+COL = GRID[0][1]
+RIGHT = GRID[1][0]
 story(MARGIN, 492, COL,
       "media-generation-panel-markets-0-ac9d7ffb-058c-459c-afd1-061557ef1f5a.webp",
       "MARKETS  ·  AI SELL-OFF",
@@ -108,7 +113,7 @@ story(MARGIN, 492, COL,
       "US stocks fall 3.7%; the Nasdaq erases its 2026 gains; "
       "the Nikkei drops 5%",
       img_h=100, focus_y=0.40, head_size=30, sub_size=21)
-story(MARGIN + COL + 18, 492, COL,
+story(RIGHT, 492, COL,
       "media-generation-panel-court-0-76f5fbb2-2826-42cb-97c2-239c4abc0116.webp",
       "JUSTICE  ·  WORLD COURT",
       "GUILTY OF GENOCIDE",
@@ -122,7 +127,7 @@ story(MARGIN, 724, COL,
       "Daraxonrasib left tumours undetectable in 1 in 12 patients "
       "on trial",
       img_h=100, focus_y=0.45, head_size=30, sub_size=21)
-story(MARGIN + COL + 18, 724, COL,
+story(RIGHT, 724, COL,
       "media-generation-panel-summit-0-c98a186a-5c9f-403c-8a0f-3f95146ffc25.webp",
       "POLITICS  ·  SHENZHEN SUMMIT",
       "TRUMP DEFENDS PUTIN & XI",
@@ -139,8 +144,9 @@ ticker = ("COP31 talks run past deadline over fossil fuels  ·  "
           "BepiColombo orbits Mercury")
 tx = MARGIN + 152
 ty = 972
-for line in wrap(pen, ticker, F(SANS, 19), SIZE - tx - MARGIN)[:2]:
-    pen.text((tx, ty), line, font=F(SANS, 19), fill=WHITE)
+tick_size = fit_size(pen, ticker, SANS, SIZE - tx - MARGIN, 2, 19)
+for line in wrap(pen, ticker, F(SANS, tick_size), SIZE - tx - MARGIN)[:2]:
+    pen.text((tx, ty), line, font=F(SANS, tick_size), fill=WHITE)
     ty += 25
 
 target = os.path.join(ROOT, "entry.png")
